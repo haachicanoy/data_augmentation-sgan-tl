@@ -1,2 +1,2 @@
-# Data augmentation using StyleGAN transfer learning
+# Data augmentation using transfer learning for StyleGAN
 Image data agmentation using generative models and transfer learning
