@@ -171,7 +171,7 @@ run_stylegan <- function(source_domain = "paintings", target_domain = "young_fac
   
   system('python train.py')
   cat(paste0('Experiment ', wk_dir, ' finished successfully!\n'))
-  setwd('../')
+  setwd(paste0(root, '/simulations'))
   
 }
 run_stylegan(source_domain    = "paintings",
