@@ -131,7 +131,7 @@ setwd('./simulations')
 lr     <<- 0.001 # Learning rates for Generator and Discriminator networks c(0.001, 0.0003)
 mb_rep <<- 1     # Minibatch repetitions
 
-run_stylegan <- function(source_domain = "paintings", target_domain = "young_faces", pretrained_model = "network-snapshot-008040.pkl", resolution = 512, last_iteration = 8040, target_iteration = 9000){
+run_stylegan <- function(source_domain = "paintings", target_domain = "young_faces", pretrained_model = "network-snapshot-008040.pkl", resolution = 512, last_iteration = 8040, target_iteration = 9000, learning_rate = lr, minibatch_rep = mb_rep){
   
   system('git clone https://github.com/NVlabs/stylegan.git')
   wk_dir <- paste0('stylegan_from_', source_domain, '_to_', target_domain)
@@ -145,7 +145,7 @@ run_stylegan <- function(source_domain = "paintings", target_domain = "young_fac
   
   # Modify training_loop.py
   training_loop <- readLines('./training/training_loop.py')
-  training_loop[127] <- gsub(pattern = '4', replacement = mb_rep, x = training_loop[127]) # Minibatch repeats
+  training_loop[127] <- gsub(pattern = '4', replacement = minibatch_rep, x = training_loop[127]) # Minibatch repeats
   training_loop[136] <- gsub(pattern = "None,", replacement = paste0("'", root, '/pretrained/', pretrained_model, "',"), x = training_loop[136]) # Path where pretrained model is
   training_loop[138] <- gsub(pattern = "0.0", replacement = last_iteration, x = training_loop[138]) # Last iteration to start transfer learning
   readr::write_lines(training_loop, './training/training_loop.py')
@@ -158,7 +158,7 @@ run_stylegan <- function(source_domain = "paintings", target_domain = "young_fac
   train[46] <- paste0("    desc += '-1gpu'; submit_config.num_gpus = 1; sched.minibatch_base = 4; sched.minibatch_dict = {4: 128, 8: 128, 16: 128, 32: 64, 64: 32, 128: 16, 256: 8, 512: 4}") # Enabling 1-GPU setting
   train[49] <- paste0("    #desc += '-8gpu'; submit_config.num_gpus = 8; sched.minibatch_base = 32; sched.minibatch_dict = {4: 512, 8: 256, 16: 128, 32: 64, 64: 32}") # Disabling 8-GPU setting
   train[52] <- gsub(pattern = '25000', replacement = target_iteration, x = train[52]) # Total lenght of the training
-  train[54] <- gsub(pattern = '0.003', replacement = lr, x = train[54]) # Adjusting Learning Rates for both Generator and Discriminator networks
+  train[54] <- gsub(pattern = '0.003', replacement = learning_rate, x = train[54]) # Adjusting Learning Rates for both Generator and Discriminator networks
   
   # Disabling non-used parameters
   train[96]  <- "    #metrics       = [metric_base.fid50k]                                           # Options for MetricGroup."
@@ -179,10 +179,14 @@ run_stylegan(source_domain    = "paintings",
              pretrained_model = "network-snapshot-008040.pkl",
              resolution       = 512,
              last_iteration   = 8040,
-             target_iteration = 9000)
+             target_iteration = 9000,
+             learning_rate    = lr,
+             minibatch_rep    = mb_rep)
 run_stylegan(source_domain    = "paintings",
              target_domain    = "chars",
              pretrained_model = "network-snapshot-008040.pkl",
              resolution       = 512,
              last_iteration   = 8040,
-             target_iteration = 9000)
+             target_iteration = 9000,
+             learning_rate    = lr,
+             minibatch_rep    = mb_rep)
