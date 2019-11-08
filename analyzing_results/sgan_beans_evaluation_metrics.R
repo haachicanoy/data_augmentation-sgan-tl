@@ -12,8 +12,8 @@ metrics %>%
   ggplot2::ggplot(aes(x = run, y = fid, colour = source_domain)) +
   ggplot2::geom_line() +
   ggplot2::ylim(0, 270) +
-  ggplot2::labs(colour = "Dominio de origen") +
-  ggplot2::xlab("Número de corrida") +
+  ggplot2::labs(colour = "Dominio original") +
+  ggplot2::xlab("Iteración") +
   ggplot2::ylab("Fréchet Inception Distance") +
   ggplot2::theme(axis.text = element_text(size = 15),
                  axis.title = element_text(size = 17),
