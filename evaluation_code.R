@@ -6,7 +6,7 @@ options(warn = -1, scipen = 999)
 suppressMessages(library(readr))
 
 # Define working directory
-root <- '/media/argos/MultimediaAn/HTH'
+root <- '/media/argos/DATA/HTH'
 setwd(root) # Harold THesis
 
 source_list <- c("portraits","pokemon","paintings","cats","bedrooms")
@@ -16,7 +16,12 @@ for(target in target_list){
   for(source in source_list){
     
     # Set working directory
-    setwd(paste0("/media/argos/MultimediaAn/HTH/simulations/stylegan_from_", source, "_to_", target))
+    setwd(paste0("/media/argos/DATA/HTH/simulations/stylegan_from_", source, "_to_", target))
+    # Load inception model
+    frechet_inception_distance <- readLines('./metrics/frechet_inception_distance.py')
+    frechet_inception_distance[29] <- paste0("        inception = misc.load_pkl('/media/argos/DATA/HTH/pkl/inception_v3_features.pkl')")
+    readr::write_lines(frechet_inception_distance, './metrics/frechet_inception_distance.py')
+    
     # Setting up run_metrics.py
     run_metrics <- readLines('./run_metrics.py')
     run_metrics[77] <- paste0("    #tasks += [EasyDict(run_func_name='run_metrics.run_pickle', network_pkl='https://drive.google.com/uc?id=1MEGjdvVpUsu1jB4zrXZN7Y4kBBOzizDQ', dataset_args=EasyDict(tfrecord_dir='ffhq', shuffle_mb=0), mirror_augment=True)] # karras2019stylegan-ffhq-1024x1024.pkl")
