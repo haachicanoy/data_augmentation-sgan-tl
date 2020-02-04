@@ -33,10 +33,10 @@ metrics %>%
   dplyr::mutate(Objetivo = factor(Objetivo, levels = c('Semillas','Carbonizados','Rostros'))) %>%
   dplyr::mutate(Origen = factor(Origen, levels = c('Pinturas','Retratos','Pokemon','Habitaciones','Gatos'))) %>%
   dplyr::group_by(Origen, Objetivo) %>%
-  dplyr::mutate(Duración = (Iteración-min(Iteración))/30) %>%
+  dplyr::mutate(Duración = ((Iteración-min(Iteración))/30)*90/60) %>%
   ggplot2::ggplot(aes(x = Duración, y = FID, group = Origen, colour = Origen)) +
   ggplot2::geom_line(size = 1.2) +
-  ggplot2::geom_vline(xintercept = 24, linetype="dotted", size = 1.2) +
+  ggplot2::geom_vline(xintercept = c(24, 48), linetype="dotted", size = 1.2) +
   ggplot2::facet_wrap(~Objetivo, scales = 'free') +
   ggplot2::theme_bw() +
   ggplot2::theme(axis.text = element_text(size = 17),
