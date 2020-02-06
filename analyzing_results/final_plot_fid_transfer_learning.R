@@ -14,10 +14,14 @@ metrics %>%
   dplyr::group_by(Origen, Objetivo) %>%
   dplyr::summarise(FID_mdn = median(FID, na.rm = T),
                    FID_mad = mad(FID, na.rm = T)) %>%
+  dplyr::ungroup() %>%
+  tibble::add_row(., Origen = 'Retratos', Objetivo = 'Carbonizados', FID_mdn = 0, FID_mad = 0) %>%
+  tibble::add_row(., Origen = 'Pokemon', Objetivo = 'Carbonizados', FID_mdn = 0, FID_mad = 0) %>%
   ggplot2::ggplot(aes(x = factor(Objetivo, levels = c('Semillas','Carbonizados','Rostros')), y = FID_mdn, fill = factor(Origen, levels = c('Pinturas','Retratos','Pokemon','Habitaciones','Gatos')))) +
   ggplot2::geom_bar(stat = "identity", position = position_dodge()) +
   ggplot2::geom_errorbar(aes(ymin = FID_mdn-FID_mad, ymax = FID_mdn+FID_mad), width = .2, position = position_dodge(.9)) +
-  ggplot2::scale_fill_brewer(palette = 'Set1') +
+  ggplot2::scale_fill_brewer(palette = 'Set1', drop = F) +
+  ggplot2::scale_x_discrete(drop = F) +
   ggplot2::scale_y_continuous(expand = c(0,0), limits = c(0, 70)) +
   ggplot2::theme_bw() +
   ggplot2::theme(axis.text = element_text(size = 17),
