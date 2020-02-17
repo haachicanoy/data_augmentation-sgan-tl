@@ -9,6 +9,7 @@ tbl %>%
                       names_to = 'Edad',
                       values_to = 'Frecuencia') %>%
   dplyr::filter(Dataset %in% c('ADB','APR','UTK','WKI')) %>%
+  dplyr::mutate(Dataset = factor(Dataset, levels = c('ADB','APR','UTK','WKI'), labels = c('AgeDB','APPA-REAL','UTKFace','IMDB-WIKI'))) %>%
   # dplyr::group_by(Dataset) %>%
   # dplyr::mutate(Frecuencia2 = scale(Frecuencia)) %>%
   ggplot2::ggplot(aes(x = as.numeric(Edad), y = Frecuencia, group = Dataset)) +
