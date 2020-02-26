@@ -17,6 +17,7 @@ tbl %>%
   ggplot2::scale_colour_brewer(palette = 'Dark2') +
   ggplot2::xlab('Edad (años)') +
   ggplot2::ylab('Número de imágenes') +
+  ggplot2::labs(colour = "Conjunto de\nimágenes") +
   ggplot2::scale_y_continuous(expand = c(0,0)) +
   ggplot2::scale_x_continuous(breaks = seq(0,120,5), expand = c(0,0)) +
   ggplot2::theme_bw() +
