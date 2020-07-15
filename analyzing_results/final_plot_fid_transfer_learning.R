@@ -34,6 +34,40 @@ metrics %>%
   ggplot2::labs(fill = 'Dominio de origen') +
   ggplot2::ggsave(filename = "/Volumes/BACKUP/Documents/Masters/FID_median_transfer_learning.png", device = "png", width = 8, height = 6, units = "in")
 
+# Barplot graph: paper document (english version)
+metrics_en <- metrics
+metrics_en$Origen[metrics_en$Origen == 'Pinturas'] <- 'Paintings'
+metrics_en$Origen[metrics_en$Origen == 'Retratos'] <- 'Portraits'
+metrics_en$Origen[metrics_en$Origen == 'Habitaciones'] <- 'Bedrooms'
+metrics_en$Origen[metrics_en$Origen == 'Gatos'] <- 'Cats'
+
+metrics_en$Objetivo[metrics_en$Objetivo == 'Semillas'] <- 'Bean seeds'
+metrics_en$Objetivo[metrics_en$Objetivo == 'Carbonizados'] <- 'Chars'
+metrics_en$Objetivo[metrics_en$Objetivo == 'Rostros'] <- 'Young faces'
+
+metrics_en %>%
+  dplyr::group_by(Origen, Objetivo) %>%
+  dplyr::summarise(FID_mdn = median(FID, na.rm = T),
+                   FID_mad = mad(FID, na.rm = T)) %>%
+  dplyr::ungroup() %>%
+  tibble::add_row(., Origen = 'Portraits', Objetivo = 'Chars', FID_mdn = 0, FID_mad = 0) %>%
+  tibble::add_row(., Origen = 'Pokemon', Objetivo = 'Chars', FID_mdn = 0, FID_mad = 0) %>%
+  ggplot2::ggplot(aes(x = factor(Objetivo, levels = c('Bean seeds','Chars','Young faces')), y = FID_mdn, fill = factor(Origen, levels = c('Paintings','Portraits','Pokemon','Bedrooms','Cats')))) +
+  ggplot2::geom_bar(stat = "identity", position = position_dodge()) +
+  ggplot2::geom_errorbar(aes(ymin = FID_mdn-FID_mad, ymax = FID_mdn+FID_mad), width = .2, position = position_dodge(.9)) +
+  ggplot2::scale_fill_brewer(palette = 'Set1', drop = F) +
+  ggplot2::scale_x_discrete(drop = F) +
+  ggplot2::scale_y_continuous(expand = c(0,0), limits = c(0, 70)) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(axis.text = element_text(size = 17),
+                 axis.title = element_text(size = 20),
+                 legend.text = element_text(size = 17),
+                 legend.title = element_text(size = 20)) +
+  ggplot2::xlab('Target domain') +
+  ggplot2::ylab('FID (median)') +
+  ggplot2::labs(fill = 'Source domain') +
+  ggplot2::ggsave(filename = "/Volumes/BACKUP/Documents/Masters/FID_median_transfer_learning_en.png", device = "png", width = 8, height = 6, units = "in")
+
 # Time series graph: thesis document
 metrics %>%
   dplyr::mutate(Objetivo = factor(Objetivo, levels = c('Semillas','Carbonizados','Rostros'))) %>%
@@ -79,6 +113,29 @@ metrics %>%
   ggplot2::labs(colour = 'Dominio de origen') +
   ggplot2::ggsave(filename = "/Volumes/BACKUP/Documents/Masters/FID_over_time_transfer_learning_slides.png", device = "png", width = 12, height = 6, units = "in")
 
+# Time series graph: thesis slides xlim max 1000 iter
+metrics_en %>%
+  dplyr::mutate(Objetivo = factor(Objetivo, levels = c('Bean seeds','Chars','Young faces'))) %>%
+  dplyr::mutate(Origen = factor(Origen, levels = c('Paintings','Portraits','Pokemon','Bedrooms','Cats'))) %>%
+  dplyr::group_by(Origen, Objetivo) %>%
+  dplyr::mutate(Duración = (Iteración-min(Iteración))) %>%
+  ggplot2::ggplot(aes(x = Duración, y = FID, group = Origen, colour = Origen)) +
+  ggplot2::geom_line(size = 1.2) +
+  ggplot2::xlim(0, 1000) +
+  # ggplot2::geom_vline(xintercept = c(24, 48), linetype="dotted", size = 1.2) +
+  ggplot2::facet_wrap(~Objetivo, scales = 'fixed') +
+  ggplot2::theme_bw() +
+  ggplot2::theme(axis.text = element_text(size = 17),
+                 axis.title = element_text(size = 20),
+                 legend.text = element_text(size = 17),
+                 legend.title = element_text(size = 20),
+                 strip.text = element_text(size = 20),
+                 legend.position = "bottom") +
+  ggplot2::scale_colour_brewer(palette = 'Set1') +
+  ggplot2::xlab('Iteration') +
+  ggplot2::labs(colour = 'Source domain') +
+  ggplot2::ggsave(filename = "/Volumes/BACKUP/Documents/Masters/FID_over_time_transfer_learning_en.png", device = "png", width = 12, height = 6, units = "in")
+
 # Time series graph: thesis slides portraits long run
 metrics %>%
   dplyr::filter(Origen == 'Retratos' & Objetivo == 'Semillas') %>%
@@ -99,3 +156,29 @@ metrics %>%
   ggplot2::xlab('Iteraciones') +
   ggplot2::labs(colour = 'Dominio de origen') +
   ggplot2::ggsave(filename = "/Volumes/BACKUP/Documents/Masters/FID_over_time_TL_long_train_slides.png", device = "png", width = 6, height = 6, units = "in")
+
+# Features sharing without training
+metrics %>%
+  dplyr::mutate(Objetivo = factor(Objetivo, levels = c('Semillas','Carbonizados','Rostros'))) %>%
+  dplyr::mutate(Origen = factor(Origen, levels = c('Pinturas','Retratos','Pokemon','Habitaciones','Gatos'))) %>%
+  dplyr::group_by(Origen, Objetivo) %>%
+  dplyr::mutate(Duración = ((Iteración-min(Iteración))/30)*90/60) %>%
+  dplyr::filter(Duración == 0) %>%
+  dplyr::ungroup() %>%
+  tibble::add_row(., Origen = 'Retratos', Objetivo = 'Carbonizados', Iteración = NA, FID = 0, Duración = 0) %>%
+  tibble::add_row(., Origen = 'Pokemon', Objetivo = 'Carbonizados', Iteración = NA, FID = 0, Duración = 0) %>%
+  ggplot2::ggplot(aes(x = factor(Objetivo, levels = c('Semillas','Carbonizados','Rostros')), y = FID, fill = factor(Origen, levels = c('Pinturas','Retratos','Pokemon','Habitaciones','Gatos')))) +
+  ggplot2::geom_bar(stat = "identity", position = position_dodge()) +
+  ggplot2::ylim(0, 300) +
+  ggplot2::scale_fill_brewer(palette = 'Set1', drop = F) +
+  ggplot2::scale_x_discrete(drop = F) +
+  ggplot2::scale_y_continuous(expand = c(0,0), limits = c(0, 300)) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(axis.text = element_text(size = 17),
+                 axis.title = element_text(size = 20),
+                 legend.text = element_text(size = 17),
+                 legend.title = element_text(size = 20)) +
+  ggplot2::xlab('Dominio objetivo') +
+  ggplot2::ylab('FID (Iteración 0)') +
+  ggplot2::labs(fill = 'Dominio de origen') +
+  ggplot2::ggsave(filename = "/Volumes/BACKUP/Documents/Masters/FID_TL_0_iterations.png", device = "png", width = 12, height = 6, units = "in")
